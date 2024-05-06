@@ -5,28 +5,29 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	ICredentialDataDecryptedObject,
+	NodeApiError,
 } from 'n8n-workflow';
 import {
 	defaultWebhookDescription,
 } from './description';
 import crypto from 'crypto';
 
-class WebhookAuthorizationError extends Error {
-	constructor(
-		readonly responseCode: number,
-		message?: string,
-	) {
-		if (message === undefined) {
-			message = 'Authorization problem!';
-			if (responseCode === 401) {
-				message = 'Authorization is required!';
-			} else if (responseCode === 403) {
-				message = 'Authorization data is wrong!';
-			}
-		}
-		super(message);
-	}
-}
+// class WebhookAuthorizationError extends Error {
+// 	constructor(
+// 		readonly responseCode: number,
+// 		message?: string,
+// 	) {
+// 		if (message === undefined) {
+// 			message = 'Authorization problem!';
+// 			if (responseCode === 401) {
+// 				message = 'Authorization is required!';
+// 			} else if (responseCode === 403) {
+// 				message = 'Authorization data is wrong!';
+// 			}
+// 		}
+// 		super(message);
+// 	}
+// }
 
 function s2b(str: string, encoding: BufferEncoding): Buffer {
   return Buffer.from(str, encoding);
@@ -110,7 +111,8 @@ export class LineWebhook implements INodeType {
 			if (expectedCred === undefined || !expectedCred.channel_secret) {
 				// Data is not defined on node so can not authenticate
 				console.error('No auth provided');
-				throw new WebhookAuthorizationError(500, 'No authentication data defined on node!');
+				throw new NodeApiError(this.getNode(), {});
+				// throw new WebhookAuthorizationError(500, 'No authentication data defined on node!');
 			}
 
 			// const expectedValue = crypto.createHmac('SHA256', expectedCred.channel_secret as string).update(body).digest();
@@ -119,15 +121,16 @@ export class LineWebhook implements INodeType {
 				!validateSignature(body, expectedCred.channel_secret as string, (headers as IDataObject)[headerName] as string)
 			) {
 				// Provided authentication data is wrong
-				throw new WebhookAuthorizationError(403);
+				throw new NodeApiError(this.getNode(), {});
+				// throw new WebhookAuthorizationError(403);
 			}
 		} catch(error) {
 			console.error(error);
-			if (error instanceof WebhookAuthorizationError) {
+			// if (error instanceof WebhookAuthorizationError) {
 				resp.writeHead(error.responseCode, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
 				resp.end(error.message);
 				return { noWebhookResponse: true };
-			}
+			// }
 			throw error;
 		}
 

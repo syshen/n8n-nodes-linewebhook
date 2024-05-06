@@ -3,13 +3,15 @@
 	"version": "0.1.0",
 	"description": "Line n8n webhook node",
 	"keywords": [
-		"n8n-community-node-package"
+		"n8n-community-node-package",
+		"communication",
+		"line"
 	],
 	"license": "MIT",
 	"homepage": "",
 	"author": {
-		"name": "",
-		"email": ""
+		"name": "Steven Shen",
+		"email": "sysheen@gmail.com"
 	},
 	"repository": {
 		"type": "git",
@@ -30,13 +32,9 @@
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"credentials": [
-			"dist/credentials/ExampleCredentialsApi.credentials.js",
-			"dist/credentials/HttpBinApi.credentials.js",
 			"dist/credentails/LineWebhook.credentails.js"
 		],
 		"nodes": [
-			"dist/nodes/ExampleNode/ExampleNode.node.js",
-			"dist/nodes/HttpBin/HttpBin.node.js",
 			"dist/nodes/LineWebhook/LineWebhook.node.js"
 		]
 	},
