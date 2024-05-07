@@ -1,4 +1,4 @@
-# n8n-nodes-_node-name_
+# n8n-nodes-linewebhook
 
 This is an n8n Line webhook node. It lets you create a webhook n8n node for your line chatbot.
 
