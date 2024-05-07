@@ -12,22 +12,6 @@ import {
 } from './description';
 import crypto from 'crypto';
 
-// class WebhookAuthorizationError extends Error {
-// 	constructor(
-// 		readonly responseCode: number,
-// 		message?: string,
-// 	) {
-// 		if (message === undefined) {
-// 			message = 'Authorization problem!';
-// 			if (responseCode === 401) {
-// 				message = 'Authorization is required!';
-// 			} else if (responseCode === 403) {
-// 				message = 'Authorization data is wrong!';
-// 			}
-// 		}
-// 		super(message);
-// 	}
-// }
 
 function s2b(str: string, encoding: BufferEncoding): Buffer {
   return Buffer.from(str, encoding);
@@ -126,12 +110,9 @@ export class LineWebhook implements INodeType {
 			}
 		} catch(error) {
 			console.error(error);
-			// if (error instanceof WebhookAuthorizationError) {
-				resp.writeHead(error.responseCode, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
-				resp.end(error.message);
-				return { noWebhookResponse: true };
-			// }
-			throw error;
+			resp.writeHead(error.responseCode, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
+			resp.end(error.message);
+			return { noWebhookResponse: true };
 		}
 
 		return {
