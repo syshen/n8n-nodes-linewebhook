@@ -76,16 +76,23 @@ export class LineWebhook implements INodeType {
 		const body = req.rawBody;
 
 		const returnData: IDataObject[] = [];
-		returnData.push({
-			headers: headers,
-			params: this.getParamsData(),
-			query: this.getQueryData(),
-			body: this.getBodyData(),
-		});
+		// returnData.push({
+		// 	headers: headers,
+		// 	params: this.getParamsData(),
+		// 	query: this.getQueryData(),
+		// 	body: this.getBodyData(),
+		// });
 
-		// const req = this.getRequestObject();
-		const resp = this.getResponseObject();
-		// const requestMethod = this.getRequestObject().method;
+		const bodyObject = this.getBodyData();
+		const destination = bodyObject['destination'];
+		if (bodyObject['events']) {
+			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
+				returnData.push({
+					destination: destination,
+					event: event
+				});
+			}
+		}
 
 		try {
 			let expectedCred: ICredentialDataDecryptedObject | undefined;
@@ -96,20 +103,17 @@ export class LineWebhook implements INodeType {
 				// Data is not defined on node so can not authenticate
 				console.error('No auth provided');
 				throw new NodeApiError(this.getNode(), {});
-				// throw new WebhookAuthorizationError(500, 'No authentication data defined on node!');
 			}
 
-			// const expectedValue = crypto.createHmac('SHA256', expectedCred.channel_secret as string).update(body).digest();
 			if (
 				!headers.hasOwnProperty(headerName) ||
 				!validateSignature(body, expectedCred.channel_secret as string, (headers as IDataObject)[headerName] as string)
 			) {
 				// Provided authentication data is wrong
 				throw new NodeApiError(this.getNode(), {});
-				// throw new WebhookAuthorizationError(403);
 			}
 		} catch(error) {
-			console.error(error);
+			const resp = this.getResponseObject();
 			resp.writeHead(error.responseCode, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
 			resp.end(error.message);
 			return { noWebhookResponse: true };

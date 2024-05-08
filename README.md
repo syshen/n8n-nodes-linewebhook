@@ -23,6 +23,8 @@ This is an n8n Line webhook node. It lets you create a webhook n8n node for your
 5. Select Install.
 After installing the node, you can use it like any other node. n8n displays the node in search results in the Nodes panel.
 
+!(images/installation.png "Community node installation")
+
 ### Manual installation
 
 To get started install the package in your n8n root directory:
@@ -42,8 +44,11 @@ _List the operations supported by your node._
 ## Credentials
 
 1. Sign up on [Line Developer Console](https://developers.line.biz/en/)
-2. Create a messaging API, and copy the channel access token
-3. Paste the channel access token in node's credential setting
+2. Create a messaging API channel, and then copy the channel secret
+3. Paste the channel secret in node's credential setting
+4. Configure the Webhook URL in the messaging API settings
+
+!(images/channel_secret.png "Set up channel secret")
 
 ## Compatibility
 
