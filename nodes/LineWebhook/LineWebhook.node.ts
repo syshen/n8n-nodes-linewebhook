@@ -52,7 +52,7 @@ export class LineWebhook implements INodeType {
 		credentials: [
 			{
 				name: 'lineWebhookAuthApi',
-				required: false,
+				required: true,
 			},
 		],
 		properties: [
@@ -76,12 +76,6 @@ export class LineWebhook implements INodeType {
 		const body = req.rawBody;
 
 		const returnData: IDataObject[] = [];
-		// returnData.push({
-		// 	headers: headers,
-		// 	params: this.getParamsData(),
-		// 	query: this.getQueryData(),
-		// 	body: this.getBodyData(),
-		// });
 
 		const bodyObject = this.getBodyData();
 		const destination = bodyObject['destination'];

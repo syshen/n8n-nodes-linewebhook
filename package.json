@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-linewebhook",
-	"version": "0.1.5",
-	"description": "Line n8n webhook node",
+	"version": "0.1.6",
+	"description": "Line n8n webhook & messaging nodes",
 	"keywords": [
 		"n8n-community-node-package",
 		"communication",
@@ -32,9 +32,11 @@
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"credentials": [
+			"dist/credentials/LineMessagingAuthApi.credentials.js",
 			"dist/credentials/LineWebhookAuthApi.credentials.js"
 		],
 		"nodes": [
+			"dist/nodes/LineWebhook/LineMessaging.node.js",
 			"dist/nodes/LineWebhook/LineWebhook.node.js"
 		]
 	},
@@ -47,6 +49,7 @@
 		"n8n-core": "*",
 		"n8n-workflow": "^1.36.1",
 		"prettier": "^2.7.1",
-		"typescript": "~4.8.4"
+		"typescript": "~4.8.4",
+		"@line/bot-sdk": "^9.2.2"
 	}
 }
