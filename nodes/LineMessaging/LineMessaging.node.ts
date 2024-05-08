@@ -50,14 +50,11 @@ export class LineMessaging implements INodeType {
 		});
 
 		const items = this.getInputData();
-		console.log(items);
 		for (let item of items) {
-			console.log(item);
-			if (typeof item["replyToken"] === 'string') {
-				const replyToken = item["replyToken"] as string;
+			if (typeof item.json["replyToken"] === 'string') {
+				const replyToken = item.json["replyToken"] as string;
 				if (replyToken) {
-					console.log("replyToken", replyToken);
-					const message = item["message"] as messagingApi.Message;
+					const message = item.json["message"] as messagingApi.Message;
 					await client.replyMessage({
 						replyToken,
 						messages: [ message ],

@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-linewebhook",
-	"version": "0.1.11",
+	"version": "0.1.12",
 	"description": "Line n8n webhook & messaging nodes",
 	"keywords": [
 		"n8n-community-node-package",
