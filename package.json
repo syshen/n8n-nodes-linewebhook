@@ -32,7 +32,7 @@
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"credentials": [
-			"dist/credentails/LineWebhookAuthApi.credentials.js"
+			"dist/credentials/LineWebhookAuthApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/LineWebhook/LineWebhook.node.js"
