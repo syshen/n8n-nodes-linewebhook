@@ -6,6 +6,8 @@ import {
 	INodeTypeDescription,
 	ICredentialDataDecryptedObject,
 	NodeApiError,
+	INodeInputConfiguration,
+	INodeExecutionData,
 } from 'n8n-workflow';
 import {
 	defaultWebhookDescription,
@@ -35,6 +37,47 @@ function validateSignature(
   );
 }
 
+function outputs(): INodeInputConfiguration[] {
+	return [
+		{
+			displayName: 'text',required: false, type: 'main'
+		},
+		{
+			displayName: 'audio', required: false, type: 'main'
+		},
+		{
+			displayName: 'flex', required: false, type: 'main',
+		},
+		{
+			displayName: 'sticker', required: false, type: 'main',
+		},
+		{
+			displayName: 'image', required: false, type: 'main',
+		},
+		{
+			displayName: 'video', required: false, type: 'main',
+		},
+		{
+			displayName: 'location', required: false, type: 'main',
+		},
+		{
+			displayName: 'imagemap', required: false, type: 'main',
+		},
+		{
+			displayName: 'template', required: false, type: 'main',
+		},
+	]
+}
+
+function indexOfOuputs(type: string) {
+	for (let index = 0; index < outputs().length; index++) {
+		if (outputs()[index].displayName === type) {
+			return index;
+		}
+	}
+	return null;
+}
+
 export class LineWebhook implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'LineWebhook',
@@ -47,7 +90,7 @@ export class LineWebhook implements INodeType {
 			name: 'LineWebhook',
 		},
 		inputs: ['main'],
-		outputs: ['main'],
+		outputs: outputs(),
 		webhooks: [defaultWebhookDescription],
 		credentials: [
 			{
@@ -75,19 +118,6 @@ export class LineWebhook implements INodeType {
 		const req = this.getRequestObject();
 		const body = req.rawBody;
 
-		const returnData: IDataObject[] = [];
-
-		const bodyObject = this.getBodyData();
-		const destination = bodyObject['destination'];
-		if (bodyObject['events']) {
-			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
-				returnData.push({
-					destination: destination,
-					event: event
-				});
-			}
-		}
-
 		try {
 			let expectedCred: ICredentialDataDecryptedObject | undefined;
 			expectedCred = await this.getCredentials('lineWebhookAuthApi') as {
@@ -113,9 +143,40 @@ export class LineWebhook implements INodeType {
 			return { noWebhookResponse: true };
 		}
 
+		const returnData: IDataObject[][] = [
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[]
+		];
+
+		const bodyObject = this.getBodyData();
+		const destination = bodyObject['destination'];
+		if (bodyObject['events']) {
+			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
+				const type = (event['message'] as IDataObject)['type'];
+				const oi = indexOfOuputs(type as string);
+				if (oi !== null) {
+					returnData[oi].push({
+						destination: destination,
+						event: event
+					});
+				}
+			}
+		}
+
+		const outputData: INodeExecutionData[][] = [];
+		for (let idx = 0; idx < returnData.length; idx++) {
+			outputData.push(this.helpers.returnJsonArray(returnData[idx]));
+		}
+
 		return {
-			workflowData: [this.helpers.returnJsonArray(returnData)],
+			workflowData: outputData,
 		};
 	}
-
 }
