@@ -36,7 +36,7 @@
 			"dist/credentials/LineWebhookAuthApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/LineWebhook/LineMessaging.node.js",
+			"dist/nodes/LineMessaging/LineMessaging.node.js",
 			"dist/nodes/LineWebhook/LineWebhook.node.js"
 		]
 	},
