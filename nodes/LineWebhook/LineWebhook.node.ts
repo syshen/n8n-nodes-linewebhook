@@ -66,6 +66,9 @@ function outputs(): INodeInputConfiguration[] {
 		{
 			displayName: 'template', required: false, type: 'main',
 		},
+		{
+			displayName: 'postback', required: false, type: 'main',
+		}
 	]
 }
 
@@ -143,17 +146,10 @@ export class LineWebhook implements INodeType {
 			return { noWebhookResponse: true };
 		}
 
-		const returnData: IDataObject[][] = [
-			[],
-			[],
-			[],
-			[],
-			[],
-			[],
-			[],
-			[],
-			[]
-		];
+		const returnData: IDataObject[][] = [];
+		for (let index = 0; index < outputs().length; index++) {
+			returnData.push([]);
+		}
 
 		const bodyObject = this.getBodyData();
 		const destination = bodyObject['destination'];
