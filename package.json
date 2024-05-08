@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-linewebhook",
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"description": "Line n8n webhook & messaging nodes",
 	"keywords": [
 		"n8n-community-node-package",
@@ -49,7 +49,9 @@
 		"n8n-core": "*",
 		"n8n-workflow": "^1.36.1",
 		"prettier": "^2.7.1",
-		"typescript": "~4.8.4",
+		"typescript": "~4.8.4"
+	},
+	"dependencies": {
 		"@line/bot-sdk": "^9.2.2"
 	}
 }
