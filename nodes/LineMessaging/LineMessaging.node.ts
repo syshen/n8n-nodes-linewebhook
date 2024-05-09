@@ -12,7 +12,7 @@ const { MessagingApiClient } = messagingApi;
 
 export class LineMessaging implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'LineMessaging',
+		displayName: 'Line Messaging API',
 		name: 'LineMessaging',
 		icon: 'file:line.svg',
 		group: ['transform'],

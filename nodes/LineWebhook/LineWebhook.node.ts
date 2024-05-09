@@ -83,7 +83,7 @@ function indexOfOuputs(type: string) {
 
 export class LineWebhook implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'LineWebhook',
+		displayName: 'Line Webhook',
 		name: 'LineWebhook',
 		icon: 'file:line.svg',
 		group: ['trigger'],

@@ -7,7 +7,7 @@ import {
 
 export class LineMessageNode implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'LineMessageNode',
+		displayName: 'Line Message',
 		name: 'LineMessageNode',
 		icon: 'file:line.svg',
 		group: ['transform'],
@@ -37,10 +37,11 @@ export class LineMessageNode implements INodeType {
 						name: 'Image',
 						value: 'image',
 					},
+					/*
 					{
 						name: 'Imagemap',
 						value: 'imagemap',
-					},
+					},*/
 					{
 						name: 'Location',
 						value: 'location',
@@ -48,11 +49,11 @@ export class LineMessageNode implements INodeType {
 					{
 						name: 'Sticker',
 						value: 'sticker',
-					},
+					},/*
 					{
 						name: 'Template',
 						value: 'template',
-					},
+					},*/
 					{
 						name: 'Text',
 						value: 'text',
@@ -77,6 +78,49 @@ export class LineMessageNode implements INodeType {
 					},
 				}
 			},
+			// Sticker
+			{
+				displayName: 'Package ID',
+				name: 'packageId',
+				type: 'string',
+				default: '',
+				placeholder: '',
+				required: true,
+				description: 'Package ID for a set of stickers. For information on package IDs, see the https://developers.line.biz/en/docs/messaging-api/sticker-list/ .',
+				displayOptions: {
+					show: {
+						messageType: ['sticker'],
+					},
+				},
+			},
+			{
+				displayName: 'Sticker ID',
+				name: 'stickerId',
+				type: 'string',
+				default: '',
+				placeholder: '',
+				required: true,
+				description: 'Sticker ID. For a list of sticker IDs for stickers that can be sent with the Messaging API, see the https://developers.line.biz/en/docs/messaging-api/sticker-list/ .',
+				displayOptions: {
+					show: {
+						messageType: ['sticker'],
+					},
+				},
+			},
+			{
+				displayName: 'Quote Token',
+				name: 'quoteToken',
+				type: 'string',
+				default: '',
+				placeholder: '',
+				description: 'Quote token of the message you want to quote',
+				displayOptions: {
+					show: {
+						messageType: ['sticker'],
+					},
+				}
+			},
+			// video, audio, image
 			{
 				displayName: 'URL',
 				name: 'originalContentUrl',
@@ -118,6 +162,7 @@ export class LineMessageNode implements INodeType {
 					},
 				},
 			},
+			// audio
 			{
 				displayName: "Duration",
 				name: "duration",
@@ -132,6 +177,7 @@ export class LineMessageNode implements INodeType {
 					},
 				}
 			},
+			// Location
 			{
 				displayName: "Title",
 				name: "title",
@@ -188,6 +234,7 @@ export class LineMessageNode implements INodeType {
 					},
 				}
 			},
+			// Flex messaage type options
 			{
 				displayName: "Alt Text",
 				name: "altText",
@@ -196,6 +243,20 @@ export class LineMessageNode implements INodeType {
 				placeholder: "",
 				required: true,
 				description: "Alternative text. When a user receives a message, it will appear in the device's notifications, talk list, and quote messages as an alternative to the Flex. Max character limit: 400",
+				displayOptions: {
+					show: {
+						messageType: ['flex'],
+					},
+				}
+			},
+			{
+				displayName: "Flex Content",
+				name: "flexContent",
+				type: "json",
+				default: '',
+				placeholder: '',
+				required: true,
+				description: "The message payload for Flex message. Use Flex simulator to create message payload and paste the JSON code here.",
 				displayOptions: {
 					show: {
 						messageType: ['flex'],
@@ -262,6 +323,24 @@ export class LineMessageNode implements INodeType {
 					address,
 					latitude,
 					longitude
+				}
+			} else if (messageType === 'flex') {
+				const altText = this.getNodeParameter('altText', i) as string;
+				const flexContent = this.getNodeParameter('flexContent', i) as string;
+				message = {
+					type: 'flex',
+					altText,
+					content: flexContent
+				}
+			} else if (messageType === 'sticker') {
+				const packageId = this.getNodeParameter('packageId', i) as string;
+				const stickerId = this.getNodeParameter('stickerId', i) as string;
+				const quoteToken = this.getNodeParameter('quoteToken', i) as string;
+				message = {
+					type: 'sticker',
+					packageId,
+					stickerId,
+					quoteToken
 				}
 			}
 
