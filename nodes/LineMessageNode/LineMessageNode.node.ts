@@ -5,7 +5,7 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-export class LineMessage implements INodeType {
+export class LineMessageNode implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'LineMessageNode',
 		name: 'LineMessageNode',
