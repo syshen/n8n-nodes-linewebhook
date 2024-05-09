@@ -7,8 +7,10 @@ import {
 	NodeApiError,
 } from 'n8n-workflow';
 
+import { messagingAPIOperations } from './LineMessagingDescription';
+
 import { messagingApi } from '@line/bot-sdk';
-const { MessagingApiClient } = messagingApi;
+const { MessagingApiClient, MessagingApiBlobClient } = messagingApi;
 
 export class LineMessaging implements INodeType {
 	description: INodeTypeDescription = {
@@ -30,23 +32,7 @@ export class LineMessaging implements INodeType {
 			},
 		],
 		properties: [
-			{
-				displayName: 'Message',
-				name: 'message',
-				type: 'json',
-				default: '',
-				placeholder: '',
-				required: true,
-				description: 'The message payload'
-			},
-			{
-				displayName: 'ReplyToken',
-				name: 'replyToken',
-				type: 'string',
-				default: '',
-				placeholder: '',
-				description: 'The reply token for reply message'
-			}
+			...messagingAPIOperations
 		],
 	};
 
@@ -65,19 +51,39 @@ export class LineMessaging implements INodeType {
 		const client = new MessagingApiClient({
 			channelAccessToken: expectedCred.channel_access_token as string,
 		});
+		const blobClient = new MessagingApiBlobClient({
+			channelAccessToken: expectedCred.channel_access_token as string,
+		})
 
 		const items = this.getInputData();
 		const length = items.length;
+		const returnData: INodeExecutionData[] = [];
+
 		for (let i = 0; i < length; i++) {
-			const replyToken = this.getNodeParameter('replyToken', i) as string;
-			const message = this.getNodeParameter('message', i) as messagingApi.Message;
-			if (replyToken) {
-				await client.replyMessage({
-					replyToken,
-					messages: [ message ],
-				});
+			const operation = this.getNodeParameter('operation', i) as string;
+			if (operation === 'message') {
+				const replyToken = this.getNodeParameter('replyToken', i) as string;
+				const message = this.getNodeParameter('message', i) as messagingApi.Message;
+				if (replyToken) {
+					await client.replyMessage({
+						replyToken,
+						messages: [ message ],
+					});
+				} else {
+
+				}
+				returnData.push(items[i]);
+
+			} else if (operation === 'getMessageContent') {
+				const messageId = this.getNodeParameter('messageId', i) as string;
+				const fp = await blobClient.getMessageContent(messageId);
+				const blob = new Response(fp).blob();
+				returnData.push({json: {
+					data: blob
+				}});
 			}
 		}
-		return this.prepareOutputData(items);
+		return this.prepareOutputData(returnData);
+
 	}
 }
