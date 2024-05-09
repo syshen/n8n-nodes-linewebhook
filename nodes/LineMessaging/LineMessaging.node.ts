@@ -77,7 +77,7 @@ export class LineMessaging implements INodeType {
 			} else if (operation === 'getMessageContent') {
 				const messageId = this.getNodeParameter('messageId', i) as string;
 				const fp = await blobClient.getMessageContent(messageId);
-				const blob = new Response(fp).blob();
+				const blob = await new Response(fp).blob();
 				returnData.push({json: {
 					data: blob
 				}});
