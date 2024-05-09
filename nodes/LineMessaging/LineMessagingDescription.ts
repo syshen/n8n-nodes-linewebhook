@@ -55,7 +55,7 @@ export const messagingAPIOperations: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		placeholder: '',
-		description: 'The message ID for reply message',
+		description: 'The message ID to retrieve message content',
 		displayOptions: {
 			show: {
 				operation: ['getMessageContent']

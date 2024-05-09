@@ -8,6 +8,7 @@ import {
 	NodeApiError,
 	INodeInputConfiguration,
 	INodeExecutionData,
+	ConnectionTypes,
 } from 'n8n-workflow';
 import {
 	defaultWebhookDescription,
@@ -38,37 +39,19 @@ function validateSignature(
 }
 
 function outputs(): INodeInputConfiguration[] {
+	const messageTypes = ['text', 'audio', 'sticker', 'image', 'video', 'location'];
+	const eventTypes = ['postback', 'join', 'leave', 'memberJoined', 'memberLeft'];
 	return [
-		{
-			displayName: 'text',required: false, type: 'main'
-		},
-		{
-			displayName: 'audio', required: false, type: 'main'
-		},
-		{
-			displayName: 'flex', required: false, type: 'main',
-		},
-		{
-			displayName: 'sticker', required: false, type: 'main',
-		},
-		{
-			displayName: 'image', required: false, type: 'main',
-		},
-		{
-			displayName: 'video', required: false, type: 'main',
-		},
-		{
-			displayName: 'location', required: false, type: 'main',
-		},
-		{
-			displayName: 'imagemap', required: false, type: 'main',
-		},
-		{
-			displayName: 'template', required: false, type: 'main',
-		},
-		{
-			displayName: 'postback', required: false, type: 'main',
-		}
+		...messageTypes.map((messageType) => ({
+			displayName: messageType,
+			required: false,
+			type: 'main' as ConnectionTypes,
+		})),
+		...eventTypes.map((eventType) => ({
+			displayName: eventType,
+			required: false,
+			type: 'main' as ConnectionTypes,
+		}))
 	]
 }
 
@@ -156,12 +139,21 @@ export class LineWebhook implements INodeType {
 		if (bodyObject['events']) {
 			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
 				const type = (event['message'] as IDataObject)['type'];
-				const oi = indexOfOuputs(type as string);
+				let oi = indexOfOuputs(type as string);
 				if (oi !== null) {
 					returnData[oi].push({
-						destination: destination,
-						event: event
+						destination,
+						event
 					});
+				} else {
+					const eventType = (event['type'] as string);
+					let oi = indexOfOuputs(eventType as string);
+					if (oi !== null) {
+						returnData[oi].push({
+							destination,
+							event
+						});
+					}
 				}
 			}
 		}
