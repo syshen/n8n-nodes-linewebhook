@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-linewebhook",
-	"version": "0.1.14",
+	"version": "0.1.15",
 	"description": "Line n8n webhook & messaging nodes",
 	"keywords": [
 		"n8n-community-node-package",
@@ -37,7 +37,8 @@
 		],
 		"nodes": [
 			"dist/nodes/LineMessaging/LineMessaging.node.js",
-			"dist/nodes/LineWebhook/LineWebhook.node.js"
+			"dist/nodes/LineWebhook/LineWebhook.node.js",
+			"dist/nodes/LineWebhook/LineMessageNode.node.js"
 		]
 	},
 	"devDependencies": {
