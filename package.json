@@ -38,7 +38,7 @@
 		"nodes": [
 			"dist/nodes/LineMessaging/LineMessaging.node.js",
 			"dist/nodes/LineWebhook/LineWebhook.node.js",
-			"dist/nodes/LineWebhook/LineMessageNode.node.js"
+			"dist/nodes/LineMessageNode/LineMessageNode.node.js"
 		]
 	},
 	"devDependencies": {
