@@ -4,14 +4,9 @@
 	"codexVersion": "1.0",
 	"categories": ["Communitcation"],
 	"resources": {
-		"credentialDocumentation": [
-			{
-				"url": ""
-			}
-		],
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://developers.line.biz/en/reference/messaging-api/#message-objects"
 			}
 		]
 	}

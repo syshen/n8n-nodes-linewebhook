@@ -6,12 +6,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": ""
+				"url": "https://developers.line.biz/en/docs/basics/channel-access-token/"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://developers.line.biz/en/docs/messaging-api/sending-messages/"
 			}
 		]
 	}

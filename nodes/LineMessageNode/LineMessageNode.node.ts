@@ -65,22 +65,142 @@ export class LineMessageNode implements INodeType {
 				default: 'text',
 			},
 			{
-				displayName: 'ImageUrl',
+				displayName: "Text",
+				name: "text",
+				type: "string",
+				default: "",
+				placeholder: "",
+				description: "The text message you want to send to user",
+				displayOptions: {
+					show: {
+						messageType: ['text'],
+					},
+				}
+			},
+			{
+				displayName: 'URL',
 				name: 'originalContentUrl',
 				type: 'string',
 				default: '',
 				placeholder: '',
 				required: true,
-				description: 'The image URL',
+				description: 'The URL for image, video, or audio file (Max character limit: 2000)',
+				displayOptions: {
+					show: {
+						messageType: ['image', 'audio', 'video'],
+					},
+				},
 			},
 			{
-				displayName: 'PreviewUrl',
+				displayName: 'Preview Url',
 				name: 'previewImageUrl',
 				type: 'string',
 				default: '',
 				placeholder: '',
 				required: true,
-				description: 'Image preview thumbnail URL',
+				description: 'Preview image URL (Max character limit: 2000)',
+				displayOptions: {
+					show: {
+						messageType: ['image', 'video'],
+					},
+				},
+			},
+			{
+				displayName: 'Tracking ID',
+				name: 'trackingId',
+				type: 'string',
+				default: '',
+				placeholder: '',
+				description: 'ID used to identify the video when Video viewing complete event occurs. If you send a video message with trackingId added, the video viewing complete event occurs when the user finishes watching the video.',
+				displayOptions: {
+					show: {
+						messageType: ['audio', 'video'],
+					},
+				},
+			},
+			{
+				displayName: "Duration",
+				name: "duration",
+				type: "number",
+				default: 0,
+				placeholder: "",
+				required: true,
+				description: "Audio duration",
+				displayOptions: {
+					show: {
+						messageType: ['audio'],
+					},
+				}
+			},
+			{
+				displayName: "Title",
+				name: "title",
+				type: "string",
+				default: "",
+				placeholder: "",
+				required: true,
+				description: "Location title, max character limit: 100",
+				displayOptions: {
+					show: {
+						messageType: ['location'],
+					},
+				}
+			},
+			{
+				displayName: "Address",
+				name: "address",
+				type: "string",
+				default: "",
+				placeholder: "",
+				required: true,
+				description: "Location address, max character limit: 100",
+				displayOptions: {
+					show: {
+						messageType: ['location'],
+					},
+				}
+			},
+			{
+				displayName: "Latitude",
+				name: "latitude",
+				type: "number",
+				default: 0,
+				placeholder: "",
+				required: true,
+				description: "Location Latitude",
+				displayOptions: {
+					show: {
+						messageType: ['location'],
+					},
+				}
+			},
+			{
+				displayName: "Longitude",
+				name: "longitude",
+				type: "number",
+				default: 0,
+				placeholder: "",
+				required: true,
+				description: "Location Longtidue",
+				displayOptions: {
+					show: {
+						messageType: ['location'],
+					},
+				}
+			},
+			{
+				displayName: "Alt Text",
+				name: "altText",
+				type: "string",
+				default: "",
+				placeholder: "",
+				required: true,
+				description: "Alternative text. When a user receives a message, it will appear in the device's notifications, talk list, and quote messages as an alternative to the Flex. Max character limit: 400",
+				displayOptions: {
+					show: {
+						messageType: ['flex'],
+					},
+				}
 			},
 			{
 				displayName: 'ReplyToken',
@@ -99,17 +219,57 @@ export class LineMessageNode implements INodeType {
 		const length = items.length;
 		const returnData: INodeExecutionData[] = [];
 		for (let i = 0; i < length; i++) {
-			const originalContentUrl = this.getNodeParameter('originalContentUrl', i) as string;
-			const previewImageUrl = this.getNodeParameter('previewImageUrl', i) as string;
+			const messageType = this.getNodeParameter('messageType', i) as string;
+			let message = null;
+			if (messageType === 'text') {
+				const text = this.getNodeParameter('text', i) as string;
+				message = {
+					type: 'text',
+					text
+				}
+			} else if (messageType === 'image') {
+				const originalContentUrl = this.getNodeParameter('originalContentUrl', i) as string;
+				const previewImageUrl = this.getNodeParameter('previewImageUrl', i) as string;
+				message = {
+					type: 'image',
+					originalContentUrl,
+					previewImageUrl,
+				}
+			} else if (messageType === 'video') {
+				const originalContentUrl = this.getNodeParameter('originalContentUrl', i) as string;
+				const previewImageUrl = this.getNodeParameter('previewImageUrl', i) as string;
+				message = {
+					type: 'video',
+					originalContentUrl,
+					previewImageUrl,
+				}
+			} else if (messageType === 'audio') {
+				const originalContentUrl = this.getNodeParameter('originalContentUrl', i) as string;
+				const duration = this.getNodeParameter('duration', i) as number;
+				message = {
+					type: 'video',
+					originalContentUrl,
+					duration,
+				}
+			} else if (messageType === 'location') {
+				const title = this.getNodeParameter('title', i) as string;
+				const address = this.getNodeParameter('address', i) as string;
+				const latitude = this.getNodeParameter('latitude', i) as number;
+				const longitude = this.getNodeParameter('longitude', i) as number;
+				message = {
+					type: 'location',
+					title,
+					address,
+					latitude,
+					longitude
+				}
+			}
+
 			const replyToken = this.getNodeParameter('replyToken', i) as string;
 			returnData.push({
 				json: {
 					replyToken,
-					message: {
-						type: 'image',
-						originalContentUrl,
-						previewImageUrl,
-					},
+					message
 				},
 			});
 		}
