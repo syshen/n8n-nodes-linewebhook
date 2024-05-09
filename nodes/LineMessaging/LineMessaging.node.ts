@@ -30,6 +30,23 @@ export class LineMessaging implements INodeType {
 			},
 		],
 		properties: [
+			{
+				displayName: 'Message',
+				name: 'message',
+				type: 'json',
+				default: '',
+				placeholder: '',
+				required: true,
+				description: 'The message payload'
+			},
+			{
+				displayName: 'ReplyToken',
+				name: 'replyToken',
+				type: 'string',
+				default: '',
+				placeholder: '',
+				description: 'The reply token for reply message'
+			}
 		],
 	};
 
@@ -50,16 +67,15 @@ export class LineMessaging implements INodeType {
 		});
 
 		const items = this.getInputData();
-		for (let item of items) {
-			if (typeof item.json["replyToken"] === 'string') {
-				const replyToken = item.json["replyToken"] as string;
-				if (replyToken) {
-					const message = item.json["message"] as messagingApi.Message;
-					await client.replyMessage({
-						replyToken,
-						messages: [ message ],
-					});
-				}
+		const length = items.length;
+		for (let i = 0; i < length; i++) {
+			const replyToken = this.getNodeParameter('replyToken', i) as string;
+			const message = this.getNodeParameter('message', i) as messagingApi.Message;
+			if (replyToken) {
+				await client.replyMessage({
+					replyToken,
+					messages: [ message ],
+				});
 			}
 		}
 		return this.prepareOutputData(items);
