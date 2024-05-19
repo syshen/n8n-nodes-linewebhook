@@ -84,6 +84,18 @@ export class LineMessaging implements INodeType {
 							body, 'data', contentType
 						),
 					}});
+			} else if (operation === 'getGroupChatSummary') {
+				const groupId = this.getNodeParameter('groupId', i) as string;
+				const group_summary_resp = await client.getGroupSummary(groupId);
+				returnData.push({json: group_summary_resp});
+			} else if (operation === 'getGroupChatMemberUserIds') {
+				const groupId = this.getNodeParameter('groupId', i) as string;
+				const group_member_user_ids_resp = await client.getGroupMembersIds(groupId);
+				returnData.push({json: group_member_user_ids_resp});
+			} else if (operation === 'getUserProfile') {
+				const userId = this.getNodeParameter('userId', i) as string;
+				const user_profile_resp = await client.getProfile(userId);
+				returnData.push({json: user_profile_resp});
 			}
 		}
 		return this.prepareOutputData(returnData);
