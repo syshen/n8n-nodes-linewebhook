@@ -138,15 +138,17 @@ export class LineWebhook implements INodeType {
 		const destination = bodyObject['destination'];
 		if (bodyObject['events']) {
 			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
-				const type = (event['message'] as IDataObject)['type'];
-				let oi = indexOfOuputs(type as string);
-				if (oi !== null) {
-					returnData[oi].push({
-						destination,
-						event
-					});
+				const eventType = (event['type'] as string);
+				if (eventType === 'message') {
+					const type = (event['message'] as IDataObject)['type'];
+					let oi = indexOfOuputs(type as string);
+					if (oi !== null) {
+						returnData[oi].push({
+							destination,
+							event
+						});
+					}
 				} else {
-					const eventType = (event['type'] as string);
 					let oi = indexOfOuputs(eventType as string);
 					if (oi !== null) {
 						returnData[oi].push({

@@ -92,7 +92,7 @@ export class LineMessaging implements INodeType {
 				const groupId = this.getNodeParameter('groupId', i) as string;
 				const group_member_user_ids_resp = await client.getGroupMembersIds(groupId);
 				returnData.push({json: group_member_user_ids_resp});
-			} else if (operation === 'getUserProfile') {
+			} else if (operation === 'getProfile') {
 				const userId = this.getNodeParameter('userId', i) as string;
 				const user_profile_resp = await client.getProfile(userId);
 				returnData.push({json: user_profile_resp});
