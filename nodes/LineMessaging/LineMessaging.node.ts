@@ -70,7 +70,13 @@ export class LineMessaging implements INodeType {
 						messages: [ message ],
 					});
 				} else {
-
+					const targetRecepient = this.getNodeParameter('targetRecipient', i) as string;
+					if (targetRecepient) {
+						await client.pushMessage({
+							to: targetRecepient,
+							messages: [ message ],
+						});
+					}
 				}
 				returnData.push(items[i]);
 

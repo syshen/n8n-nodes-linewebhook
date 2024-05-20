@@ -108,5 +108,18 @@ export const messagingAPIOperations: INodeProperties[] = [
 				operation: ['getProfile'],
 			},
 		},
+	},
+	{
+		displayName: 'Target Recipient',
+		name: 'targetRecipient',
+		type: 'string',
+		default: '',
+		placeholder: '',
+		description: 'ID of the target recipient. Use a userId, groupId, or roomId to send a message to a user, group, or room.',
+		displayOptions: {
+			show: {
+				operation: ['message'],
+			},
+		},
 	}
 ];
