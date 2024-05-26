@@ -1,13 +1,12 @@
 # n8n-nodes-linewebhook
 
-This is an n8n Line webhook node. It lets you create a webhook n8n node for your line chatbot.
+This is an n8n Line support. It lets you create a line chatbot with n8n without any coding.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
 [Installation](#installation)  
 [Operations](#operations)  
 [Credentials](#credentials)
-[Usage](#usage)  
 
 ## Installation
 
@@ -110,6 +109,5 @@ Retrieve the user's profile with a user id.
 
 ![Credential example for Line Messaging API node](images/messaging_api_cred.png)
 
-## Usage
 
 
