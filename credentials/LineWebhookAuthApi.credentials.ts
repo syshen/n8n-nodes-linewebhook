@@ -5,7 +5,8 @@ import {
 
 export class LineWebhookAuthApi implements ICredentialType {
 	name = 'lineWebhookAuthApi';
-	displayName = 'Line Webhook Auth API';
+	// eslint-disable-next-line n8n-nodes-base/cred-class-field-display-name-missing-api
+	displayName = 'Line Webhook Auth Credential';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Channel Secret',
