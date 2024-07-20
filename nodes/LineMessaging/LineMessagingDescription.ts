@@ -8,6 +8,13 @@ export const messagingAPIOperations: INodeProperties[] = [
 		noDataExpression: true,
 		options: [
 			{
+				name: 'Get Group Chat Member Profile',
+				value: 'getGroupChatMemberProfile',
+				description:
+					'Gets the profile information of a member of a group chat that the LINE Official Account is in if the user ID of the group member is known',
+				action: 'Get group chat member profile',
+			},
+			{
 				name: 'Get Group Chat Member User IDs',
 				value: 'getGroupChatMemberUserIds',
 				description:
@@ -92,7 +99,7 @@ export const messagingAPIOperations: INodeProperties[] = [
 		description: 'Group ID. Found in the source object of webhook event objects.',
 		displayOptions: {
 			show: {
-				operation: ['getGroupChatSummary', 'getGroupChatMemberUserIds'],
+				operation: ['getGroupChatSummary', 'getGroupChatMemberUserIds', 'getGroupChatMemberProfile'],
 			},
 		},
 	},
@@ -105,7 +112,7 @@ export const messagingAPIOperations: INodeProperties[] = [
 		description: 'User ID that is returned in a webhook event object. Do not use the LINE ID found on LINE.',
 		displayOptions: {
 			show: {
-				operation: ['getProfile'],
+				operation: ['getProfile', 'getGroupChatMemberProfile'],
 			},
 		},
 	},
