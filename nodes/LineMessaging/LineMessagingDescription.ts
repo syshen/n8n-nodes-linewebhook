@@ -42,6 +42,12 @@ export const messagingAPIOperations: INodeProperties[] = [
 				action: 'Get user profile',
 			},
 			{
+				name: 'Multicast Message',
+				value: 'multicast',
+				description: 'Send a message to multiple users',
+				action: 'Send a multicast message',
+			},
+			{
 				name: 'Send Message',
 				value: 'message',
 				description: 'Send or reply a message',
@@ -60,7 +66,7 @@ export const messagingAPIOperations: INodeProperties[] = [
 		description: 'The message payload',
 		displayOptions: {
 			show: {
-				operation: ['message'],
+				operation: ['message', 'multicast'],
 			},
 		},
 	},
@@ -128,5 +134,18 @@ export const messagingAPIOperations: INodeProperties[] = [
 				operation: ['message'],
 			},
 		},
-	}
+	},
+	{
+		displayName: 'Target Recipients',
+		name: 'targetRecipients',
+		type: 'json',
+		default: '',
+		placeholder: '',
+		description: 'Array of user IDs, group IDs, or room IDs to send a message to',
+		displayOptions: {
+			show: {
+				operation: ['multicast'],
+			},
+		},
+	},
 ];
