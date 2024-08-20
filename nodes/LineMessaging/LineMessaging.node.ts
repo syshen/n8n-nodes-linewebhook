@@ -63,28 +63,40 @@ export class LineMessaging implements INodeType {
 			const operation = this.getNodeParameter('operation', i) as string;
 			if (operation === 'message') {
 				const replyToken = this.getNodeParameter('replyToken', i) as string;
-				const message = this.getNodeParameter('message', i) as messagingApi.Message;
+				const message = this.getNodeParameter('message', i);
+				let messages: messagingApi.Message[] = [];
+				if (message instanceof Array) {
+					messages = message as messagingApi.Message[];
+				} else {
+					messages = [message as messagingApi.Message];
+				}
 				if (replyToken) {
 					await client.replyMessage({
 						replyToken,
-						messages: [ message ],
+						messages: messages,
 					});
 				} else {
 					const targetRecepient = this.getNodeParameter('targetRecipient', i) as string;
 					if (targetRecepient) {
 						await client.pushMessage({
 							to: targetRecepient,
-							messages: [ message ],
+							messages: messages,
 						});
 					}
 				}
 				returnData.push(items[i]);
 			} else if (operation === 'multicast') {
 				const targetRecipients = this.getNodeParameter('targetRecipients', i) as string[];
-				const message = this.getNodeParameter('message', i) as messagingApi.Message;
+				const message = this.getNodeParameter('message', i);
+				let messages: messagingApi.Message[] = [];
+				if (message instanceof Array) {
+					messages = message as messagingApi.Message[];
+				} else {
+					messages = [message as messagingApi.Message];
+				}
 				await client.multicast({
 					to: targetRecipients,
-					messages: [ message ],
+					messages: messages,
 				});
 			} else if (operation === 'getMessageContent') {
 				const messageId = this.getNodeParameter('messageId', i) as string;
