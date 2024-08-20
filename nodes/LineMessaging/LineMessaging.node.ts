@@ -81,10 +81,10 @@ export class LineMessaging implements INodeType {
 				returnData.push(items[i]);
 			} else if (operation === 'multicast') {
 				const targetRecipients = this.getNodeParameter('targetRecipients', i) as string[];
-				const messages = this.getNodeParameter('message', i) as messagingApi.Message[];
+				const message = this.getNodeParameter('message', i) as messagingApi.Message;
 				await client.multicast({
 					to: targetRecipients,
-					messages: messages,
+					messages: [ message ],
 				});
 			} else if (operation === 'getMessageContent') {
 				const messageId = this.getNodeParameter('messageId', i) as string;
