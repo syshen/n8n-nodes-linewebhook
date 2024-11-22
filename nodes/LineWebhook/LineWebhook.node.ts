@@ -124,7 +124,7 @@ export class LineWebhook implements INodeType {
 			}
 		} catch(error) {
 			const resp = this.getResponseObject();
-			resp.writeHead(error.responseCode, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
+			resp.writeHead(500, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
 			resp.end(error.message);
 			return { noWebhookResponse: true };
 		}
