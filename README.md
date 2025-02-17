@@ -33,7 +33,7 @@ For Docker-based deployments, add the following line before the font installatio
 
 RUN cd /usr/local/lib/node_modules/n8n && npm install n8n-nodes-linewebhook
 
-## Operations
+## Nodes
 
 ### Line Webhook
 
@@ -54,6 +54,9 @@ Supported event types:
 - member join
 - member leave
 
+![Line Webhook Node](images/line_webhook.png)
+![Line Webhook Settings](images/webhook_settings.png)
+
 ### Compose Line Message Types
 
 - [Text](https://developers.line.biz/en/docs/messaging-api/message-types/#text-messages)
@@ -73,19 +76,19 @@ Specify either replyToken to reply message or targetRecipient to send message to
 ![Connect message node to api node](images/message_nodes.png)
 ![Set up the api node to send message](images/message_node_settings.png)
 
-### Get Message Content
+#### Get Message Content
 
 [API document](https://developers.line.biz/en/reference/messaging-api/#get-group-summary)
 
 When receive multimedia message from webhook, you need to use this node to retrieve the content of the file. For example, if user sends you an image, you can use this node to retrieve the image, and send it to AWS S3.
 
-### Get Group Chat Summary
+#### Get Group Chat Summary
 
 [API document](https://developers.line.biz/en/reference/messaging-api/#get-group-summary)
 
 Retrieve the group chat summary with a group chat id.
 
-### Get User Profile
+#### Get User Profile
 
 [API document](https://developers.line.biz/en/reference/messaging-api/#get-profile)
 
