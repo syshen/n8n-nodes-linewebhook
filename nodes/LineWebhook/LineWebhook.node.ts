@@ -5,7 +5,6 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	ICredentialDataDecryptedObject,
-	NodeApiError,
 	INodeInputConfiguration,
 	INodeExecutionData,
 	ConnectionTypes,
@@ -13,6 +12,14 @@ import {
 import {
 	defaultWebhookDescription,
 } from './description';
+import { LineAuthenticationError, LineValidationError } from '../errors';
+import { 
+  outputs, 
+  indexOfOuputs, 
+  NODE_OUTPUTS, 
+  TYPE_INDEX_MAP, 
+  processLineEvents 
+} from '../utils/webhook-utils';
 import crypto from 'crypto';
 
 
@@ -27,41 +34,36 @@ function safeCompare(a: Buffer, b: Buffer): boolean {
   return crypto.timingSafeEqual(a, b);
 }
 
+/**
+ * Validates the Line webhook signature using an optimized approach
+ * 
+ * @param body - The raw body of the webhook request
+ * @param channelSecret - The Line channel secret for HMAC validation
+ * @param signature - The signature from X-Line-Signature header
+ * @returns true if signature is valid, otherwise false
+ */
 function validateSignature(
   body: string | Buffer,
   channelSecret: string,
   signature: string,
 ): boolean {
-  return safeCompare(
-    crypto.createHmac("SHA256", channelSecret).update(body.toString('utf8')).digest(),
-    s2b(signature, "base64"),
-  );
-}
-
-function outputs(): INodeInputConfiguration[] {
-	const messageTypes = ['text', 'audio', 'sticker', 'image', 'video', 'location'];
-	const eventTypes = ['postback', 'join', 'leave', 'memberJoined', 'memberLeft'];
-	return [
-		...messageTypes.map((messageType) => ({
-			displayName: messageType,
-			required: false,
-			type: 'main' as ConnectionTypes,
-		})),
-		...eventTypes.map((eventType) => ({
-			displayName: eventType,
-			required: false,
-			type: 'main' as ConnectionTypes,
-		}))
-	]
-}
-
-function indexOfOuputs(type: string) {
-	for (let index = 0; index < outputs().length; index++) {
-		if (outputs()[index].displayName === type) {
-			return index;
-		}
-	}
-	return null;
+  // Create HMAC once with proper buffer handling
+  const hmac = crypto.createHmac("SHA256", channelSecret);
+  
+  // Use buffer directly when possible to avoid encoding/decoding overhead
+  if (Buffer.isBuffer(body)) {
+    hmac.update(body);
+  } else {
+    hmac.update(body.toString('utf8'));
+  }
+  
+  const digest = hmac.digest();
+  
+  // One-time base64 decode of signature to buffer
+  const signatureBuffer = s2b(signature, "base64");
+  
+  // Use timing-safe comparison to prevent timing attacks
+  return safeCompare(digest, signatureBuffer);
 }
 
 export class LineWebhook implements INodeType {
@@ -105,68 +107,130 @@ export class LineWebhook implements INodeType {
 		const body = req.rawBody;
 
 		try {
-			let expectedCred: ICredentialDataDecryptedObject | undefined;
-			expectedCred = await this.getCredentials('lineWebhookAuthApi') as {
-				channel_secret: string
-			};
-			if (expectedCred === undefined || !expectedCred.channel_secret) {
-				// Data is not defined on node so can not authenticate
-				console.error('No auth provided');
-				throw new NodeApiError(this.getNode(), {});
+			// Credentials validation
+			let credentials;
+			try {
+				credentials = await this.getCredentials('lineWebhookAuthApi') as {
+					channel_secret: string
+				};
+				
+				if (!credentials?.channel_secret) {
+					throw new LineAuthenticationError(
+						this.getNode(),
+						'LINE channel secret is missing'
+					);
+				}
+			} catch (error) {
+				if (error.name === 'LineAuthenticationError') {
+					throw error;
+				}
+				throw new LineAuthenticationError(
+					this.getNode(),
+					'Failed to load LINE webhook credentials'
+				);
 			}
 
-			if (
-				!headers.hasOwnProperty(headerName) ||
-				!validateSignature(body, expectedCred.channel_secret as string, (headers as IDataObject)[headerName] as string)
-			) {
-				// Provided authentication data is wrong
-				throw new NodeApiError(this.getNode(), {});
+			// Signature validation
+			if (!headers.hasOwnProperty(headerName)) {
+				throw new LineValidationError(
+					this.getNode(),
+					'Missing signature header',
+					'The x-line-signature header is required for LINE webhook validation'
+				);
 			}
-		} catch(error) {
-			const resp = this.getResponseObject();
-			resp.writeHead(500, { 'WWW-Authenticate': 'Basic realm="Webhook"' });
-			resp.end(error.message);
-			return { noWebhookResponse: true };
-		}
+			
+			const signature = (headers as IDataObject)[headerName] as string;
+			if (!validateSignature(body, credentials.channel_secret, signature)) {
+				throw new LineAuthenticationError(
+					this.getNode(),
+					'Invalid webhook signature'
+				);
+			}
+			
+			// Webhook data validation
+			const bodyObject = this.getBodyData();
+			if (!bodyObject['events'] || !Array.isArray(bodyObject['events'])) {
+				throw new LineValidationError(
+					this.getNode(),
+					'Invalid webhook data format',
+					'The webhook payload must contain an events array'
+				);
+			}
+			
+			// Process webhook data
+			// Initialize return data array with empty arrays for each output type
+			const returnData: IDataObject[][] = Array(NODE_OUTPUTS.length).fill(null).map(() => []);
 
-		const returnData: IDataObject[][] = [];
-		for (let index = 0; index < outputs().length; index++) {
-			returnData.push([]);
-		}
-
-		const bodyObject = this.getBodyData();
-		const destination = bodyObject['destination'];
-		if (bodyObject['events']) {
-			for (const event of (bodyObject['events'] as Array<IDataObject>)) {
-				const eventType = (event['type'] as string);
-				if (eventType === 'message') {
-					const type = (event['message'] as IDataObject)['type'];
-					let oi = indexOfOuputs(type as string);
-					if (oi !== null) {
-						returnData[oi].push({
-							destination,
-							event
-						});
+			const destination = bodyObject['destination'];
+			const events = bodyObject['events'] as Array<IDataObject>;
+			
+			try {
+				for (const event of events) {
+					const eventType = (event['type'] as string);
+					
+					if (!eventType) {
+						continue; // Skip events without a type
 					}
-				} else {
-					let oi = indexOfOuputs(eventType as string);
-					if (oi !== null) {
-						returnData[oi].push({
-							destination,
-							event
-						});
+					
+					if (eventType === 'message') {
+						if (!event['message'] || typeof event['message'] !== 'object') {
+							continue; // Skip invalid message events
+						}
+						
+						const messageType = (event['message'] as IDataObject)['type'] as string;
+						if (!messageType) {
+							continue; // Skip messages without a type
+						}
+						
+						const outputIndex = indexOfOuputs(messageType);
+						if (outputIndex !== null) {
+							returnData[outputIndex].push({
+								destination,
+								event,
+								receivedAt: new Date().toISOString(),
+							});
+						}
+					} else {
+						const outputIndex = indexOfOuputs(eventType);
+						if (outputIndex !== null) {
+							returnData[outputIndex].push({
+								destination,
+								event,
+								receivedAt: new Date().toISOString(),
+							});
+						}
 					}
 				}
+			} catch (error) {
+				throw new LineValidationError(
+					this.getNode(),
+					`Failed to process webhook events: ${error.message}`,
+					'Error occurred while processing the webhook payload'
+				);
 			}
-		}
 
-		const outputData: INodeExecutionData[][] = [];
-		for (let idx = 0; idx < returnData.length; idx++) {
-			outputData.push(this.helpers.returnJsonArray(returnData[idx]));
-		}
+			const outputData: INodeExecutionData[][] = [];
+			for (let idx = 0; idx < returnData.length; idx++) {
+				outputData.push(this.helpers.returnJsonArray(returnData[idx]));
+			}
 
-		return {
-			workflowData: outputData,
-		};
+			return {
+				workflowData: outputData,
+			};
+			
+		} catch (error) {
+			const resp = this.getResponseObject();
+			
+			if (error.name === 'LineAuthenticationError') {
+				resp.writeHead(401, { 'WWW-Authenticate': 'Basic realm="LINE Webhook"' });
+			} else if (error.name === 'LineValidationError') {
+				resp.writeHead(400);
+			} else {
+				resp.writeHead(500);
+			}
+			
+			resp.end(error.message || 'Webhook error');
+			return { noWebhookResponse: true };
+		}
 	}
 }
