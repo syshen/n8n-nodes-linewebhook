@@ -30,22 +30,33 @@ export function outputs(): INodeInputConfiguration[] {
 }
 
 export function indexOfOuputs(type: string): number | null {
-  return TYPE_INDEX_MAP.has(type) ? TYPE_INDEX_MAP.get(type)\! : null;
+  return TYPE_INDEX_MAP.has(type) ? TYPE_INDEX_MAP.get(type) || null : null;
 }
 
+/**
+ * Process LINE webhook events efficiently with optimized event routing
+ * 
+ * This function processes an array of LINE events and routes them to the
+ * appropriate output based on their type.
+ * 
+ * @param events - Array of LINE webhook event objects
+ * @param destination - The destination from the webhook payload
+ * @returns A 2D array of processed events grouped by output type
+ */
 export function processLineEvents(events: IDataObject[], destination: any): IDataObject[][] {
   // Initialize return data array with empty arrays for each output type
   const returnData: IDataObject[][] = Array(NODE_OUTPUTS.length).fill(null).map(() => []);
   
-  // Generate single timestamp for all events in this batch
+  // Batch timestamp generation - create once for all events
   const receivedAt = new Date().toISOString();
   
-  // Process all events in a single pass
+  // Process all events in a single pass with forEach for better performance
   events.forEach(event => {
-    const eventType = (event['type'] as string);
+    const eventType = event['type'] as string;
     
+    // Skip invalid events early
     if (\!eventType) {
-      return; // Skip events without a type
+      return;
     }
     
     let outputIndex: number | null = null;
@@ -54,18 +65,18 @@ export function processLineEvents(events: IDataObject[], destination: any): IDat
       // Fast-path validation for message events
       const message = event['message'] as IDataObject | undefined;
       if (\!message || typeof message \!== 'object') {
-        return; // Skip invalid message events
+        return;
       }
       
       const messageType = message['type'] as string;
       if (\!messageType) {
-        return; // Skip messages without a type
+        return;
       }
       
-      // Use map lookup instead of iteration
+      // Direct map lookup - O(1) operation
       outputIndex = TYPE_INDEX_MAP.get(messageType) ?? null;
     } else {
-      // Direct lookup for non-message events
+      // Direct map lookup for non-message events - O(1) operation
       outputIndex = TYPE_INDEX_MAP.get(eventType) ?? null;
     }
     
@@ -74,7 +85,10 @@ export function processLineEvents(events: IDataObject[], destination: any): IDat
       returnData[outputIndex].push({
         destination,
         event,
+        // Reuse the timestamp for all events in the batch
         receivedAt,
+        // Add receipt timestamp for performance metrics if needed
+        processedAt: Date.now()
       });
     }
   });
